@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Date; // Add this line
+
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -21,6 +23,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'two_factor_code', 
+        'two_factor_expires_at',
     ];
 
     /**
@@ -79,5 +83,19 @@ class User extends Authenticatable
         return $this->hasMany(Subpage::class, 'owner_id');
     }
 
+    public function generateTwoFactorCode(): void
+    {
+        $this->timestamps = false;  
+        $this->two_factor_code = rand(1, 99);  
+        $this->two_factor_expires_at = Date::now()->addMinutes(10);  
+        $this->save();
+    }
 
-}
+    public function resetTwoFactorCode(): void
+    {
+    $this->timestamps = false;
+    $this->two_factor_code = null;
+    $this->two_factor_expires_at = null;
+    $this->save();
+    }
+ }

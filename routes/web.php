@@ -7,6 +7,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SubpageController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\TwoFactorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,6 +29,10 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'twofactor'])->name('dashboard');
+
+Route::get('/dashboard', function () {
     $posts = \App\Models\Post::with('user')->latest()->get();
     return view('dashboard', compact('posts'));
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -43,7 +48,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile/settings', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/profile', [ProfileController::class, 'profile'])->name('profile.profile');
 });
-
+    //Two Factor
+Route::middleware(['auth', 'twofactor'])->group(function () {
+    Route::get('verify/resend', [TwoFactorController::class, 'resend'])->name('verify.resend');
+    Route::resource('verify', TwoFactorController::class)->only(['index', 'store']);
+});
 
 
 // Middleware for all the routes
